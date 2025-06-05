@@ -46,7 +46,7 @@ model = load_model()
 customer_info = st.session_state.customer_info
 
 # Prepare input features
-feature_names = ['LogAge', 'NumOfProducts', 'IsActiveMember', 'Geography', 'Gender', 'LogBalance']
+feature_names = ['LogAge', 'NumOfProducts', 'IsActiveMember', 'Geography', 'Gender', 'Balance', 'LogBalance']
 
 # Create a dictionary with the correct feature order
 input_dict = {
@@ -55,7 +55,8 @@ input_dict = {
     'IsActiveMember': customer_info["IsActiveMember"],
     'Geography': customer_info["Geography"],  # Keep original string values
     'Gender': customer_info["Gender"],  # Keep original string values
-    'LogBalance': customer_info["Balance"]  # Already log-transformed in customer_info
+    'Balance': customer_info["Balance"],  # Original balance for LightGBM/HistGBM
+    'LogBalance': customer_info["Balance"]  # Log-transformed for CatBoost
 }
 
 # Convert to DataFrame with explicit column order
@@ -105,23 +106,25 @@ try:
         prediction = model.predict(histgbm_input)[0]
         prediction_proba = model.predict_proba(histgbm_input)[0]
     else:  # LightGBM
-        # For LightGBM, we'll use one-hot encoding for categorical features
-        # Create a copy of input features
+        # For LightGBM, convert categorical features to numeric
         lgbm_input = input_features.copy()
         
-        # One-hot encode Geography
-        geography_dummies = pd.get_dummies(lgbm_input['Geography'], prefix='Geography')
-        lgbm_input = pd.concat([lgbm_input, geography_dummies], axis=1)
-        lgbm_input = lgbm_input.drop('Geography', axis=1)
+        # Convert categorical features to numeric
+        lgbm_input['Geography'] = lgbm_input['Geography'].map({'France': 0, 'Germany': 1, 'Spain': 2})
+        lgbm_input['Gender'] = lgbm_input['Gender'].map({'Female': 0, 'Male': 1})
         
-        # One-hot encode Gender
-        gender_dummies = pd.get_dummies(lgbm_input['Gender'], prefix='Gender')
-        lgbm_input = pd.concat([lgbm_input, gender_dummies], axis=1)
-        lgbm_input = lgbm_input.drop('Gender', axis=1)
+        # Get the best estimator from GridSearchCV
+        best_model = model.best_estimator_
+        
+        # Get the expected feature order from the model's booster
+        lgb_feature_order = best_model.booster_.feature_name()
+        
+        # Reorder columns to match the training order
+        lgbm_input = lgbm_input[lgb_feature_order]
         
         # Make prediction with LightGBM
-        prediction = model.predict(lgbm_input)[0]
-        prediction_proba = model.predict_proba(lgbm_input)[0]
+        prediction = best_model.predict(lgbm_input)[0]
+        prediction_proba = best_model.predict_proba(lgbm_input)[0]
 
     # Display prediction result
     #st.subheader("📈 예측 결과")
