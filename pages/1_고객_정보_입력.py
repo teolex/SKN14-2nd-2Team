@@ -131,7 +131,7 @@ if st.button("다음 단계로", type="primary", use_container_width=True):
         "IsActiveMember": 1 if is_active == "O" else 0,
         "Geography": geography,
         "Gender": gender,
-        "Balance": np.log(balance) # added 1 to the balance before taking the log to avoid issues with a balance of zero.
+        "Balance": np.log(balance +1) # added 1 to the balance before taking the log to avoid issues with a balance of zero.
     }
     # Navigate to the model selection page
     st.switch_page("pages/2_모델_선택.py")

@@ -7,6 +7,7 @@ from sklearn.metrics import confusion_matrix, roc_curve, precision_recall_curve,
 import seaborn as sns
 import pandas as pd
 import altair as alt
+from catboost import Pool
 
 st.set_page_config(page_title="예측 결과", layout="centered")
 st.title("예측 결과")
@@ -23,7 +24,7 @@ if "customer_info" not in st.session_state or "selected_model" not in st.session
 
 # Get selected model
 selected_model = st.session_state.get("selected_model")
-if selected_model not in ["CatBoost", "LightGBM"]:
+if selected_model not in ["CatBoost", "LightGBM", "HistGBM"]:
     st.warning("지원하지 않는 모델입니다.")
     st.switch_page("pages/2_모델_선택.py")
 
@@ -45,7 +46,7 @@ model = load_model()
 customer_info = st.session_state.customer_info
 
 # Prepare input features
-feature_names = ['LogAge', 'NumOfProducts', 'IsActiveMember', 'Geography', 'Gender', 'Balance']
+feature_names = ['LogAge', 'NumOfProducts', 'IsActiveMember', 'Geography', 'Gender', 'LogBalance']
 
 # Create a dictionary with the correct feature order
 input_dict = {
@@ -54,7 +55,7 @@ input_dict = {
     'IsActiveMember': customer_info["IsActiveMember"],
     'Geography': customer_info["Geography"],  # Keep original string values
     'Gender': customer_info["Gender"],  # Keep original string values
-    'Balance': customer_info["Balance"]
+    'LogBalance': customer_info["Balance"]  # Already log-transformed in customer_info
 }
 
 # Convert to DataFrame with explicit column order
@@ -69,16 +70,58 @@ if not all(col in input_features.columns for col in feature_names):
 try:
     # Handle different model types
     if selected_model == "CatBoost":
-        input_features['Geography'] = input_features['Geography'].map({'France': 0, 'Germany': 1, 'Spain': 2})
-        input_features['Gender'] = input_features['Gender'].map({'Female': 0, 'Male': 1})
-        prediction = model.predict(input_features)[0]
-        prediction_proba = model.predict_proba(input_features)[0]
+        # Get the best estimator from GridSearchCV
+        best_model = model.best_estimator_
+        
+        # Get feature names from the model
+        model_feature_names = best_model.feature_names_
+        
+        # Reorder columns to match model's expected order
+        input_features = input_features[model_feature_names]
+        
+        # Create CatBoost Pool with categorical features
+        pool = Pool(
+            data=input_features,
+            cat_features=["Geography", "Gender"]
+        )
+        # Make prediction with CatBoost
+        prediction = best_model.predict(pool)[0]
+        prediction_proba = best_model.predict_proba(pool)[0]
+    elif selected_model == "HistGBM":
+        # For HistGBM, convert categorical features to numeric
+        histgbm_input = input_features.copy()
+        
+        # Convert categorical features to numeric
+        histgbm_input['Geography'] = histgbm_input['Geography'].map({'France': 0, 'Germany': 1, 'Spain': 2})
+        histgbm_input['Gender'] = histgbm_input['Gender'].map({'Female': 0, 'Male': 1})
+        
+        # Get the expected feature order from the model
+        expected_features = model.feature_names_in_
+        
+        # Reorder columns to match the training order
+        histgbm_input = histgbm_input[expected_features]
+        
+        # Make prediction with HistGBM
+        prediction = model.predict(histgbm_input)[0]
+        prediction_proba = model.predict_proba(histgbm_input)[0]
     else:  # LightGBM
-        # Convert categorical features to numeric for LightGBM
-        input_features['Geography'] = input_features['Geography'].map({'France': 0, 'Germany': 1, 'Spain': 2})
-        input_features['Gender'] = input_features['Gender'].map({'Female': 0, 'Male': 1})
-        prediction = model.predict(input_features)[0]
-        prediction_proba = model.predict_proba(input_features)[0]
+        # For LightGBM, we'll use one-hot encoding for categorical features
+        # Create a copy of input features
+        lgbm_input = input_features.copy()
+        
+        # One-hot encode Geography
+        geography_dummies = pd.get_dummies(lgbm_input['Geography'], prefix='Geography')
+        lgbm_input = pd.concat([lgbm_input, geography_dummies], axis=1)
+        lgbm_input = lgbm_input.drop('Geography', axis=1)
+        
+        # One-hot encode Gender
+        gender_dummies = pd.get_dummies(lgbm_input['Gender'], prefix='Gender')
+        lgbm_input = pd.concat([lgbm_input, gender_dummies], axis=1)
+        lgbm_input = lgbm_input.drop('Gender', axis=1)
+        
+        # Make prediction with LightGBM
+        prediction = model.predict(lgbm_input)[0]
+        prediction_proba = model.predict_proba(lgbm_input)[0]
 
     # Display prediction result
     #st.subheader("📈 예측 결과")
