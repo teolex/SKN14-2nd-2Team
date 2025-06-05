@@ -23,7 +23,7 @@
 
 **3\. 모델 구조 및 설정**
 
-* **사용 모델:** (예: CNN, LSTM, BERT, XGBoost 등)  
+* **사용 모델:**  
   * SGDClassifier  
   * DecisionTree  
   * SVC  
@@ -34,7 +34,7 @@
   * HistGradientBoostClassifier  
   * LightBGM  
   * CatBoost  
-* **프레임워크/라이브러리 :** (예: PyTorch, TensorFlow, scikit-learn 등)  
+* **프레임워크/라이브러리 :**  
   * PyTorch  
   * scikit-learn  
   * pandas  
@@ -44,8 +44,8 @@
 
 **4\. 학습 환경**
 
-* **OS / 플랫폼 :** Win11, IOS  
-* **GPU / CPU 사양 :** 2.40GHz 4Core CPU  
+* **OS / 플랫폼 :** Win11, MacOS  
+* **GPU / CPU 사양 :** 2.40GHz 4Core CPU, M2  
 * **RAM / Storage :** 16GB  
 * **소프트웨어 버전:** (Python, 라이브러리 등)  
   * python         : 3.12  
