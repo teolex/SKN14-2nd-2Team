@@ -180,6 +180,12 @@ Age값을 로그스케일링해서 왜도(분포의 비대칭성)을 줄임.
 ![](./Docs/lightBGM.png)
 ![](./Docs/CatBoost.png)
 
+---
+## streamlit 대시보드
+
+| ![](./Docs/streamlit_1.png) | ![](./Docs/streamlit_2.png) |
+|-----------------------------|-----------------------------|
+| ![](./Docs/streamlit_3.png) | ![](./Docs/streamlit_4.png) |
 
 ---
 ## 대응방안
