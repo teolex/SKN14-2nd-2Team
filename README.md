@@ -170,7 +170,16 @@ Age값을 로그스케일링해서 왜도(분포의 비대칭성)을 줄임.
 ---
 ## 인공지능 학습 결과서
 
-(준비중)
+[인공지능 학습 결과서]("02_training_report/result_report.md")
+
+| Model              | Evaluation                          |
+|:-------------------|:------------------------------------|
+| LightGBMClassifier | F1 = 0.594                          |  
+| CatBoostClassifier | Accuracy = 0.865, Precision = 0.775 |  
+| HistGBMClassifier  | F1 = 0.588, 빠른 학습/추론          |
+![](./Docs/lightBGM.png)
+![](./Docs/CatBoost.png)
+
 
 ---
 ## 대응방안
