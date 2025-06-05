@@ -1,38 +1,77 @@
 # app.py
 import streamlit as st
-from utils.data_preprocessing import preprocess_data
+import time
 
 # ---------------------- 페이지 설정 ----------------------
 st.set_page_config(page_title="이탈률 예측 대시보드", layout="wide")
 
-# ---------------------- 메인 ----------------------
-st.sidebar.markdown("### 신용카드 고객 이탈률 예측 대시보드")
+# ---------------------- 메인 ---------------------- SK Networks Family 14th Team 2 
 
-st.markdown(
-    """
-    <h2>대시보드 홈</h2>
-    <hr style='margin-top:0'>
-""",
-    unsafe_allow_html=True,
-)
+# Fade-in animation and centering for content using HTML/CSS
+st.markdown("""
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-with st.expander("프로젝트 소개", expanded=True):
-    st.markdown(
-        """
-    - **목표**: 은행 고객 신용카드 계좌해지 가능성 예측
-    - **활용 분야**: 고객 유지 전략, 맞춤형 금용상품 제공 전략 수립
-    - **데이터 출처**: Kaggle - [Credit Card Customer Churn Prediction](https://www.kaggle.com/datasets/rjmanoj/credit-card-customer-churn-prediction)
-    """
-    )
+.fade-in {
+    animation: fadeIn 1.5s ease-in;
+}
 
-with st.expander("데이터 소개", expanded=True):
-    st.dataframe(preprocess_data(), use_container_width=True)
+.centered-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    text-align: center;
+}
 
-with st.expander("예측 모델 개요 (사용한 알고리즘, 주요 변수 등)", expanded=True):
-    st.markdown(
-        """
-    - 사용 알고리즘: XGBoost, Random Forest, Logistic Regression
-    - 주요 변수: 나이, 성별, 계좌잔고 등
-    - 평가 지표: Accuracy, ROC-AUC, F1-score 등
-    """
-    )
+h1 {
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+}
+
+.team-name {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 0.2rem;
+}
+
+.project-title {
+    font-size: 1.4rem;
+    color: #0066cc;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.button-container {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+</style>
+<div class="centered-container">
+    <div class="fade-in">
+        <div class="team-name">SK Networks Family 14th Team 2</div>
+        <div class="project-title">Project: 은행 고객 특성에 따른 이탈률 예측</div>
+        <h1>고객 이탈을 예측해드립니다</h1>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Wait for animation (simulate delay)
+time.sleep(1.2)
+
+# Center the buttons using columns
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    st.markdown('<div class="button-container">', unsafe_allow_html=True)
+    if st.button("예측 시작하기", type="primary", use_container_width=True):
+        st.switch_page("pages/1_고객_정보_입력.py")
+    if st.button("About This Project", use_container_width=True):
+        st.switch_page("pages/0_About_This_Project.py")
+    st.markdown('</div>', unsafe_allow_html=True)
