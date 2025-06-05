@@ -170,7 +170,7 @@ Age값을 로그스케일링해서 왜도(분포의 비대칭성)을 줄임.
 ---
 ## 인공지능 학습 결과서
 
-[인공지능 학습 결과서]("02_training_report/result_report.md")
+[인공지능 학습 결과서](./02_training_report/result_report.md)
 
 | Model              | Evaluation                          |
 |:-------------------|:------------------------------------|
